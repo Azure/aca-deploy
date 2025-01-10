@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as crypto from "crypto";
-import { ContainerAppsAPIClient, ContainerApp, TrafficWeight, Revision } from "@azure/arm-appcontainers";
+import { ContainerAppsAPIClient, ContainerApp, TrafficWeight, Revision, Container } from "@azure/arm-appcontainers";
 import { TokenCredential, DefaultAzureCredential } from "@azure/identity";
 import { AuthorizerFactory } from "azure-actions-webclient/AuthorizerFactory";
 import { IAuthorizer } from "azure-actions-webclient/Authorizer/IAuthorizer";
@@ -100,12 +100,18 @@ async function main() {
       delete networkConfig.ingress
     }
 
-    const containerConfig = [
-      {
-        "name": taskParams.containerAppName,
-        "image": taskParams.imageName
-      }
-    ]
+    const baseContainerConfig: Container = {
+      "name": taskParams.containerAppName,
+      "image": taskParams.imageName,
+      ...(taskParams.environmentVariables.length > 0 && {
+        env: taskParams.environmentVariables.map(e => {
+          const [name, value] = e.split('=');
+          return { name, value };
+        })
+      })
+    };
+
+    const containerConfig: Container[] = [baseContainerConfig];
 
     const containerAppEnvelope: ContainerApp = {
       configuration: networkConfig,
@@ -118,7 +124,7 @@ async function main() {
       }
     };
 
-    console.log("Deployment Step Started");
+    console.log("Deployment Step Started with the following envelope", JSON.stringify(containerAppEnvelope));
 
     // update
     await client.containerApps.beginUpdateAndWait(
@@ -159,17 +165,17 @@ async function deactivateRevision(params: any) {
   // Check traffic weight of the target revision
   if (targetRevisions.length > 0 && targetRevisions.reduce((prev: number, curr: any) => prev + curr.weight, 0) !== 0)
     throw new Error(`Traffic weight of revision ${revisionName} under container app ${containerAppName} is not 0. Set 0 to the traffic weight of the revision before deactivation.`);
- 　　
+
   console.log("Deactivation Step Started");
   await client.containerAppsRevisions.deactivateRevision(resourceGroup, containerAppName, revisionName);
-  
+
   // check if revision's status is deactived
   const deactiveRevision = await client.containerAppsRevisions.getRevision(
     resourceGroup,
     containerAppName,
     revisionName
   )
-  if(deactiveRevision.active) {
+  if (deactiveRevision.active) {
     throw new Error(`The revision ${revisionName} under container app ${containerAppName} can't be deactivated. Check the Azure Portal for details.`);
   } else {
     console.log("Deactivation Step Succeeded");

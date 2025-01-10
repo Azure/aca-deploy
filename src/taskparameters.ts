@@ -28,6 +28,9 @@ export class TaskParameters {
     // Optional mode parameter
     private _deactivateRevisionMode: boolean;
 
+    // Optional parameter for Environment Variables
+    private _environmentVariables: string[] = [];
+
     private constructor(endpoint: IAuthorizer) {
 
         this._subscriptionId = endpoint.subscriptionID;
@@ -55,6 +58,13 @@ export class TaskParameters {
 
         // Optional mode parameter
         this._deactivateRevisionMode = core.getInput('deactivate-revision-mode', { required: false }) == "true";
+
+        // Optional environment variables
+        this._environmentVariables = (core.getInput('environmentVariables', { required: false }) || "")
+            .split(/[\s;]/)
+            .filter(entry => entry !== "");
+
+        console.log("_environmentVariables", this._environmentVariables);
     }
 
     public static getTaskParams(endpoint: IAuthorizer) {
@@ -122,5 +132,9 @@ export class TaskParameters {
 
     public get deactivateRevisionMode() {
         return this._deactivateRevisionMode;
+    }
+
+    public get environmentVariables() {
+        return this._environmentVariables;
     }
 }

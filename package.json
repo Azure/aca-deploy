@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Azure/aca-preview.git"
+    "url": "git+https://github.com/bccactions/aca-review-apps.git"
   },
   "engines": {
     "node": "16.13.0",
@@ -41,10 +41,7 @@
     }
   ],
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Azure/aca-review-apps/issues"
-  },
-  "homepage": "https://github.com/Azure/aca-review-apps#readme",
+  "homepage": "https://github.com/bccactions/aca-review-apps#readme",
   "dependencies": {
     "@actions/core": "^1.9.1",
     "@azure/arm-appcontainers": "^1.1.0",

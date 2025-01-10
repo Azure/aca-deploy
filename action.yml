@@ -16,6 +16,12 @@ inputs:
     deactivate-revision-mode:
         description: Enable Deactivation-Revision Mode of this action. `true` or `false`. Default value is `false`
         required: false
+    environmentVariables:
+        description: |
+            'A list of environment variable(s) for the container. Space-separated values in 'key=value' format. Empty string
+            to clear existing values.'
+        required: false
+  
 outputs:
     app-url:
         description: 'Deployed App URL'
